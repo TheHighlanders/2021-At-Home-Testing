@@ -120,7 +120,9 @@ public class Robot extends TimedRobot {
   @Override
   @SuppressWarnings("LocalVariableName")
   public void teleopPeriodic() {
-
+    System.out.println(centerXDouble.length);
+    if(centerXDouble == null) { System.out.println(arrayLength);}
+    else{
     centerXDouble = centerXEntry.getDoubleArray(defaultValue);
     //firstX = centerXEntry.getDoubleArray(0)[0];
     System.out.println(firstX);
@@ -142,6 +144,7 @@ public class Robot extends TimedRobot {
             * Drivetrain.kMaxAngularSpeed;
     m_drive.drive(xSpeed, rot);
   }
+}
 
   @Override
   public void simulationPeriodic() {
