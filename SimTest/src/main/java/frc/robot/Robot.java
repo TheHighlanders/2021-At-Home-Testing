@@ -94,7 +94,8 @@ public class Robot extends TimedRobot {
     xEntry.setDoubleArray(centerXEntry.getDoubleArray(defaultValue));
     yEntry.setDoubleArray(centerYEntry.getDoubleArray(defaultValue));
 
-  
+    if (centerXDouble.length == 0) {
+      System.out.println("array is empty");}
 
   }
 
