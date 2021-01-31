@@ -7,6 +7,7 @@ package frc.robot;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.SlewRateLimiter;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -20,6 +21,8 @@ import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.trajectory.TrajectoryGenerator;
+
+import java.lang.reflect.Array;
 import java.util.List;
 
 public class Robot extends TimedRobot {
@@ -27,6 +30,8 @@ public class Robot extends TimedRobot {
 
   NetworkTableEntry xEntry;
   NetworkTableEntry yEntry;
+  NetworkTableEntry centerXEntry;
+  NetworkTableEntry centerYEntry;
 
   // Slew rate limiters to make joystick inputs more gentle; 1/3 sec from 0
   // to 1.
@@ -37,6 +42,11 @@ public class Robot extends TimedRobot {
   private final RamseteController m_ramsete = new RamseteController();
   private final Timer m_timer = new Timer();
   private Trajectory m_trajectory;
+
+  double[] centerXDouble;
+  double[] centerYDouble;
+  double[] defaultValue = new double[]{1,2,3};
+  double firstX;
 
   @Override
   public void robotInit() {
@@ -62,21 +72,30 @@ public class Robot extends TimedRobot {
        //Get the table within that instance that contains the data. There can
        //be as many tables as you like and exist to make it easier to organize
        //your data. In this case, it's a table called datatable.
-       NetworkTable table = inst.getTable("datatable");
+       NetworkTable table = inst.getTable("GRIP/myContoursReport");
 
        //Get the entries within that table that correspond to the X and Y values
        //for some operation in your program.
-       xEntry = table.getEntry("X2");
-       yEntry = table.getEntry("Y2");
+       xEntry = table.getEntry("X");
+       yEntry = table.getEntry("Y");
+       centerXEntry = table.getEntry("centerX");
+       centerYEntry = table.getEntry("centerY");
        }
 
        double x = 0;
        double y = 0;
+
             
 
   @Override
   public void robotPeriodic() {
     m_drive.periodic();
+
+    xEntry.setDoubleArray(centerXEntry.getDoubleArray(defaultValue));
+    yEntry.setDoubleArray(centerYEntry.getDoubleArray(defaultValue));
+
+  
+
   }
 
   @Override
@@ -93,19 +112,26 @@ public class Robot extends TimedRobot {
     ChassisSpeeds speeds = m_ramsete.calculate(m_drive.getPose(), reference);
     m_drive.drive(speeds.vxMetersPerSecond, speeds.omegaRadiansPerSecond);
 
-    xEntry.setDouble(x);
-    yEntry.setDouble(y);
-    x += 0.05;
-    y += 1.0;
+
+
+
   }
 
   @Override
   @SuppressWarnings("LocalVariableName")
   public void teleopPeriodic() {
+
+    centerXDouble = centerXEntry.getDoubleArray(defaultValue);
+    //firstX = centerXEntry.getDoubleArray(0)[0];
+    System.out.println(firstX);
+    //firstX = centerXDouble[0];
+    //centerXEntry.getDoubleArray(defaultValue)[0];
+    firstX = Array.getDouble(centerXEntry.getDoubleArray(defaultValue), 0);
+
     // Get the x speed. We are inverting this because Xbox controllers return
     // negative values when we push forward.
-    double xSpeed =
-        -m_speedLimiter.calculate(m_controller.getY(GenericHID.Hand.kLeft)) * Drivetrain.kMaxSpeed;
+    double xSpeed = firstX/100;
+        //-m_speedLimiter.calculate(m_controller.getY(GenericHID.Hand.kLeft)) * Drivetrain.kMaxSpeed;
 
     // Get the rate of angular rotation. We are inverting this because we want a
     // positive value when we pull to the left (remember, CCW is positive in
