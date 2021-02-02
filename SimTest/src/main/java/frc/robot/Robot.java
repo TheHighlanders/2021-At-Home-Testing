@@ -93,7 +93,7 @@ public class Robot extends TimedRobot {
 
     xEntry.setDoubleArray(centerXEntry.getDoubleArray(defaultValue));
     yEntry.setDoubleArray(centerYEntry.getDoubleArray(defaultValue));
-
+    centerXDouble = centerXEntry.getDoubleArray(defaultValue);
   
 
   }
@@ -120,10 +120,10 @@ public class Robot extends TimedRobot {
   @Override
   @SuppressWarnings("LocalVariableName")
   public void teleopPeriodic() {
-    if(centerXDouble != null) {
-      
+    
+    if(centerXDouble != null) {  
 
-    centerXDouble = centerXEntry.getDoubleArray(defaultValue);
+    
     //firstX = centerXEntry.getDoubleArray(0)[0];
     System.out.println(firstX);
     //firstX = centerXDouble[0];
@@ -143,7 +143,7 @@ public class Robot extends TimedRobot {
         -m_rotLimiter.calculate(m_controller.getX(GenericHID.Hand.kLeft))
             * Drivetrain.kMaxAngularSpeed;
     m_drive.drive(xSpeed, rot);
-  }
+  } else { System.out.println("Arraynull"); }
 }
 
   @Override
