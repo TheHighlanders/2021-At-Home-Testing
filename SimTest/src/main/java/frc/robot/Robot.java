@@ -30,6 +30,9 @@ public class Robot extends TimedRobot {
 
   NetworkTableEntry xEntry;
   NetworkTableEntry yEntry;
+  NetworkTableEntry isValid;
+  boolean isValidBool;
+  NetworkTableEntry targetPitchEntry;
   NetworkTableEntry centerXEntry;
   NetworkTableEntry centerYEntry;
 
@@ -42,11 +45,14 @@ public class Robot extends TimedRobot {
   private final RamseteController m_ramsete = new RamseteController();
   private final Timer m_timer = new Timer();
   private Trajectory m_trajectory;
-
-  double[] centerXDouble;
-  double[] centerYDouble;
-  double[] defaultValue = new double[]{1,2,3};
+  double rotDrive;
+  double centerXDouble;
+  double centerYDouble;
+  double defaultValue = 1 ;
   double firstX;
+  double targetPitchDoub;
+  //double xSpeed;
+
 
   @Override
   public void robotInit() {
@@ -72,14 +78,15 @@ public class Robot extends TimedRobot {
        //Get the table within that instance that contains the data. There can
        //be as many tables as you like and exist to make it easier to organize
        //your data. In this case, it's a table called datatable.
-       NetworkTable table = inst.getTable("GRIP/myContoursReport");
+       NetworkTable table = inst.getTable("chameleon-vision/HD Pro Webcam C920");
 
        //Get the entries within that table that correspond to the X and Y values
        //for some operation in your program.
-       xEntry = table.getEntry("X");
-       yEntry = table.getEntry("Y");
-       centerXEntry = table.getEntry("centerX");
-       centerYEntry = table.getEntry("centerY");
+       xEntry = table.getEntry("targetYaw2");
+       centerXEntry = table.getEntry("targetYaw");
+       isValid = table.getEntry("isValid");
+       targetPitchEntry=table.getEntry("targetPitch");
+       //isValidBool = isValid.getBoolean(false);
        }
 
        double x = 0;
@@ -89,13 +96,14 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotPeriodic() {
+  if( isValidBool = true ){
     m_drive.periodic();
 
-    xEntry.setDoubleArray(centerXEntry.getDoubleArray(defaultValue));
-    yEntry.setDoubleArray(centerYEntry.getDoubleArray(defaultValue));
-    centerXDouble = centerXEntry.getDoubleArray(defaultValue);
+    xEntry.setDouble(centerXEntry.getDouble(defaultValue));
+    targetPitchDoub = targetPitchEntry.getDouble(defaultValue);
+    centerXDouble = centerXEntry.getDouble(defaultValue);
   
-
+  };
   }
 
   @Override
@@ -120,31 +128,43 @@ public class Robot extends TimedRobot {
   @Override
   @SuppressWarnings("LocalVariableName")
   public void teleopPeriodic() {
-    
-    if(centerXDouble != null) {  
 
+    isValidBool = isValid.getBoolean(false);
+
+    double xSpeed;
     
     //firstX = centerXEntry.getDoubleArray(0)[0];
     System.out.println(firstX);
     //firstX = centerXDouble[0];
     //centerXEntry.getDoubleArray(defaultValue)[0];
-    firstX = Array.getDouble(centerXEntry.getDoubleArray(defaultValue), 0);
+    firstX = centerXEntry.getDouble(defaultValue);
+    if(isValidBool==true) {
 
     // Get the x speed. We are inverting this because Xbox controllers return
     // negative values when we push forward.
-    double xSpeed = firstX/100;
+    
+     xSpeed = targetPitchDoub/10;
+     rotDrive = centerXDouble/10;
         //-m_speedLimiter.calculate(m_controller.getY(GenericHID.Hand.kLeft)) * Drivetrain.kMaxSpeed;
-
+    } else {
+       xSpeed = 0;
+       rotDrive = 0;
+    }
+    System.out.println(isValidBool);
     // Get the rate of angular rotation. We are inverting this because we want a
     // positive value when we pull to the left (remember, CCW is positive in
     // mathematics). Xbox controllers return positive values when you pull to
     // the right by default.
+
+
     double rot =
         -m_rotLimiter.calculate(m_controller.getX(GenericHID.Hand.kLeft))
             * Drivetrain.kMaxAngularSpeed;
-    m_drive.drive(xSpeed, rot);
-  } else { System.out.println("Arraynull"); }
-}
+    m_drive.drive(xSpeed, rotDrive);
+  
+  }
+    
+
 
   @Override
   public void simulationPeriodic() {
